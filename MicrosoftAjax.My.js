@@ -1,13 +1,40 @@
 ﻿/*
- *	Date.prototype
- */
-Date.prototype.addYears = function (years) {
+*	Date.prototype
+*/
+
+/*
+*   获取当前日期所在月份的最后一天
+*   参数：无
+*   返回值：28或29或30或31
+*/
+Date.prototype.getLastDate = function() {
+    var temp = this;
+    temp.setMonth(temp.getMonth() + 1, 0); //设置Month下月，Date:0,去的上个月最后一天
+    return temp.getDate();
+};
+Date.getLastDate = function(year, month) {
+    var e = Function._validateParams(arguments, [
+            { name: "year", type: Number, integer: true },
+            { name: "month", type: Number, integer: true}
+        ]);
+    if (e) throw e;
+    var d = new Date(String.format("{0}/{1}/{2}",year,month + 1,0));
+    return d.getDate();
+};
+Date.prototype.addYears = function(years) {
     var e = Function._validateParams(arguments, [
         { name: "years", type: Number, integer: true }
     ]);
     if (e) throw e;
-    this.setFullYear(this.getFullYear() + years);
-    return this;
+    var year = this.getFullYear() + years;
+    var month = this.getMonth();
+    var date = this.getDate();
+    var lastDate = Date.getLastDate(year, month + 1);
+    if (date > lastDate)
+        date = lastDate;
+    var temp = new Date(this);
+    temp.setFullYear(year, month, date);
+    return temp;
 }
 Date.prototype.addMonths = function(months) {
     var e = Function._validateParams(arguments, [
@@ -15,8 +42,15 @@ Date.prototype.addMonths = function(months) {
     ]);
     if (e) throw e;
     var totalMonths = this.getFullYear() * 12 + this.getMonth() + months;
-    this.setFullYear(Math.floor(totalMonths / 12), totalMonths % 12);
-    return this;
+    var year = Math.floor(totalMonths / 12);
+    var month = totalMonths % 12
+    var date = this.getDate();
+    var lastDate = Date.getLastDate(year, month + 1);
+    if (date > lastDate)
+        date = lastDate;
+    var temp = new Date(this);
+    temp.setFullYear(year, month, date);
+    return temp;
 };
 Date.prototype.addDays = function (days) {
     var e = Function._validateParams(arguments, [
